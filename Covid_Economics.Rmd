@@ -1,0 +1,90 @@
+```{r}
+library(dplyr)
+library(highcharter)
+library(ggplot2)
+library(readr)
+library(tidyr)
+urlConfirmed <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+
+urlDeaths<-"https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
+
+urlRecoveries<-"https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv"
+
+latestConf<-read.csv(url(urlConfirmed))
+
+latestDeaths<-read.csv(url(urlDeaths))
+
+latestRecoveries<-read.csv(url(urlRecoveries))
+
+Countries<-unique(latestConf["Country.Region"])
+```
+
+```{r}
+
+Countryname="India"
+
+###SELECT A COUNTRY  
+
+latestConf<-subset(latestConf,Country.Region==Countryname)
+latestDeaths<-subset(latestDeaths,Country.Region==Countryname)
+latestRecoveries<-subset(latestRecoveries,Country.Region==Countryname)
+
+```
+
+```{r}
+latestConf_long<- gather(latestConf, Date, Count, `X1.22.20`:ncol(latestConf))
+
+latestDeaths_long<- gather(latestDeaths, Date, Count, `X1.22.20`:ncol(latestDeaths) )
+
+latestRecoveries_long<- gather(latestRecoveries, Date, Count, `X1.22.20`:ncol(latestRecoveries) )
+
+Date_latestConf_long <- latestConf_long %>% 
+  group_by(Date) %>%
+  summarise(nConfirmed=sum(Count)) %>% 
+  arrange((nConfirmed))
+
+
+Date_latestDeaths_long_date <- latestDeaths_long %>% 
+  group_by(Date) %>%
+  summarise(nDeaths=sum(Count)) %>% 
+  arrange((nDeaths))
+
+
+Date_latestRecoveries_long_date <- latestRecoveries_long %>% 
+  group_by(Date) %>%
+  summarise(nRecoveries=sum(Count)) %>% 
+  arrange((nRecoveries))
+
+Covid_dataframe<-cbind(Date_latestConf_long,Date_latestDeaths_long_date[,2],Date_latestRecoveries_long_date[,2])
+
+write.csv(Covid_dataframe,"C:/Users/karaj/Desktop/Covid Dataframe.csv",row.names = T)
+
+```
+
+
+
+
+```{r}
+Covid <-read.csv("C:/Users/karaj/Desktop/Covid Dataframe.csv")
+Covid= Covid[,2:5]
+NSEI <- read_csv("C:/Users/karaj/Desktop/Indra Sir Project/Finance Data/New folder/NSEI.csv")
+GSPC <- read_csv("C:/Users/karaj/Desktop/Indra Sir Project/Finance Data/New folder/GSPC.csv")
+
+library(flipTime)
+Covid[1]=AsDate(Covid[1])
+NSEI[1]=AsDate(NSEI[1])
+GSPC[1]=AsDate(GSPC[1])
+
+x=abs( as.matrix(NSEI[,2]) )
+y=abs( as.matrix(Covid[,2]) )
+
+grangertest(x,y,order=1)
+print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+#grangertest(as.matrix( as.matrix(NSEI[,2])) , as.matrix(Covid[,2]) , order=1 )
+print("############################################################")
+
+```
+
+
+
+
